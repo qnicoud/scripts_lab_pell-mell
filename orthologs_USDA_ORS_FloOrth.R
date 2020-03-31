@@ -451,9 +451,10 @@ plot(1:50, wss, type="b", xlab="Number of Clusters",
 #==================================================================================================#
 # clustering
 #==================================================================================================#
+nb_clust <- 8
 
 set.seed(7)
-som_CR = som(as.matrix(fin_clust[,1:2]),  grid= somgrid(1,5, "hexagonal"), rlen = 100)
+som_CR = som(as.matrix(fin_clust[,1:2]),  grid= somgrid(1,nb_clust, "hexagonal"), rlen = 100)
 table(som_CR$unit.classif)
 par(mfrow=c(2,2))
 plot(som_CR, type = "counts")
@@ -469,14 +470,14 @@ plot(som_CR, type = "dist.neighbours")
 # creation of cluster file (all and splited) 
 #===========================================================#
 # split cluster
-split_cluster_table(nb_cluster = 5, som_data = som_CR, count_data = fin_clust)
+split_cluster_table(nb_cluster = nb_clust, som_data = som_CR, count_data = fin_clust)
 
 # clusters tables
 total_cluster_id = data.frame(ors = numeric(), usda = numeric(), cluster = numeric())
 
-nb_cluster = 5
+nb_cluster = nb_clust
 list_object = ls()
-cluster_list = grep("cluster.*[0-6]$", list_object, value = TRUE)
+cluster_list = grep(paste("cluster.*[0-", nb_clust, "]$", sep = ""), list_object, value = TRUE)
 cluster_list
 # creation of file containing all DE gene and the correspondant cluster number
 for (i in 1:length(cluster_list)){
@@ -502,7 +503,7 @@ cluster_label = as.data.frame(total_cluster_id[,3])
 row.names(cluster_label) = row.names(total_cluster_id)
 
 pheatmap(total_cluster_id[,1:2], annotation_row = cluster_label, cluster_rows = TRUE, cluster_cols = FALSE, breaks = colors, 
-         color = my_palette, show_rownames = TRUE, border_color = NA)
+         color = my_palette, show_rownames = FALSE, border_color = NA)
 
 ## heatmap without cluster details
 pheatmap(total_cluster_id[,1:2], cluster_rows = TRUE, cluster_cols = FALSE, breaks = colors, 
