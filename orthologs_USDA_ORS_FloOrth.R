@@ -8,76 +8,76 @@ load("ortholog_objects")
         install.packages("openxlsx")
         library(openxlsx)
     }
-    
+
     if (! require(xlsx)) {
         install.packages("xlsx")
         library(xlsx)
     }
-    
+
     #Package required for removing duplicates in tables.
     if( ! require(dplyr)) {
         install.packages("dplyr")
         library(dplyr)
     }
-    
+
     if( ! require(ggplot2)) {
         install.packages("ggplot2")
         library(ggplot2)
     }
-    
+
     if( ! require(ggrepel)) {
         install.packages("ggrepel")
         library(ggrepel)
     }
-    
+
     # Package required to format tables in the long-table format
     if( ! require(tidyr)) {
         install.packages("tidyr")
         library(tidyr)
     }
-    
+
     #Packages required to make multipannel figures but cowplot won't be installed...
     if( ! require(gridExtra)) {
         install.packages("gridExtra")
         library(gridExtra)
     }
-    
+
     # if( ! require(cowplot)) {
     #     devtools::install_github("wilkelab/cowplot")
     #     library(cowplot)
     # }
-    
+
     # library
     if( ! require(pheatmap)) {
         install.packages("pheatmap")
         library(pheatmap)
     }
-    
+
     if( ! require(corrplot)) {
         install.packages("corrplot")
         library(corrplot)
     }
-    
+
     if( ! require(ggplot2)) {
         install.packages("ggplot2")
         library(ggplot2)
     }
-    
+
     if( ! require(kohonen)) {
         install.packages("kohonen")
         library(kohonen)
     }
-    
+
     if( ! require(reshape2)) {
         install.packages("reshape2")
         library(reshape2)
     }
-    
+
     if( ! require(NbClust)) {
         install.packages("NbClust")
         library(NbClust)
     }
-    
+
     if( ! require(edgeR)) {
         install.packages("edgeR")
         library(edgeR)
@@ -103,16 +103,19 @@ usda <- openxlsx::read.xlsx(xlsxFile = "C:/Users/quent/Desktop/summary_ORS_USDA_
 orth <- read.csv("C:/Users/quent/Desktop/compa_phyloprofile0050_CIDsansFiltre.csv", header = TRUE, sep =";", stringsAsFactors = FALSE)
 orth <- orth[orth$X == 3 , c(1,6)]
 
+## Get correspondancy table between V1 and V2 annotation tables
 corres <- openxlsx::read.xlsx("C:/Users/quent/Desktop/ORS285_v1-v2.xlsx")
 
-orth <- orth[which(orth$ï..Label %in% corres$Previous.label),]
-a <- corres[which(corres$Previous.label %in% orth$ï..Label),]
+## restrain both lists so they have the same content
+orth <- orth[which(orth$ï¿½..Label %in% corres$Previous.label),]
+a <- corres[which(corres$Previous.label %in% orth$ï¿½..Label),]
 
+## replace v1 ids by v2 ids
 for (i in 1:dim(orth)[1]) {
-    if (sum(orth$ï..Label[i] %in% a$Previous.label)) {
-        orth$ï..Label[i] <- a$Current.label[which(a$Previous.label == orth$ï..Label[i])]
+    if (sum(orth$ï¿½..Label[i] %in% a$Previous.label)) {
+        orth$ï¿½..Label[i] <- a$Current.label[which(a$Previous.label == orth$ï¿½..Label[i])]
     } else {
-        orth$ï..Label[i] <- ""
+        orth$ï¿½..Label[i] <- ""
     }
 }
 
@@ -130,7 +133,7 @@ orth <- orth[orth$Bradyrhizobium.japonicum.USDA.110 != "",]
 orth <- orth[orth$Bradyrhizobium.japonicum.USDA.110 != "No Hit",]
 
 # If a list of genes is given as orthologs, remove all but the first (with higher identity and e-value)
-orth_cln <- data.frame(Label = orth$ï..Label, Bjap = gsub("\\,.*","",orth$Bradyrhizobium.japonicum.USDA.110))
+orth_cln <- data.frame(Label = orth$ï¿½..Label, Bjap = gsub("\\,.*","",orth$Bradyrhizobium.japonicum.USDA.110))
 colnames(orth_cln) <- c("Label", "Bjap")
 
 # Test, restrain transcriptomic tables only to the genes that are in the ortholog table
@@ -141,7 +144,7 @@ usda_orth <- usda[which(usda$Label %in% orth_cln$Bjap), c(1,12)]
 dim(ors_orth)
 dim(usda_orth)
 
-# Test, shorten the ortholog table so only the genes that are only in each transcriptomic table remain 
+# Test, shorten the ortholog table so only the genes that are only in each transcriptomic table remain
 orth_shrt <- orth_cln[which(orth_cln$Bjap %in% usda_orth$Label),]
 orth_shrt <- orth_shrt[which(orth_shrt$Label %in% ors_orth$Gene.accession),]
 
@@ -179,7 +182,7 @@ orth_spec <- orth_shrt_unq[which(orth_shrt_unq$Label %in% ors_spec) ,]
 orth_spec <- orth_spec[which(orth_spec$Bjap %in% usda_spec) ,]
 dim(orth_spec)
 
-#And also get them out of data 
+#And also get them out of data
 ors_fin <- ors_orth_shrt_unq[which(ors_orth_shrt_unq$Gene.accession %in% ors_spec),]
 usda_fin <- usda_orth_shrt_unq[which(usda_orth_shrt_unq$Label %in% usda_spec),]
 
@@ -213,7 +216,7 @@ ors_id <- ors_id[!is.na(ors_id)]
 
 
 # Final data.frame
-fin_fin <- data.frame(ors_id = ors_id, usda_id = usda_id, 
+fin_fin <- data.frame(ors_id = ors_id, usda_id = usda_id,
                       ors_lfc = ors_lfc, usda_lfc = usda_lfc)
 
 #Filtering on the FDR value
@@ -233,23 +236,23 @@ fin_fin <- fin_fin[sub_ok,]
 #                                              /      |______________________________________|     \
 #                                            /__________)                                (_________\
 
-disp <- ggplot(data = fin_fin, aes(x=ors_lfc, y=usda_lfc, color=a)) + 
+disp <- ggplot(data = fin_fin, aes(x=ors_lfc, y=usda_lfc, color=a)) +
     geom_point(size = 1) +
-    scale_color_manual(values = c("black", "red", "orange", "#ff6f00", "grey", "#248f25", "#728772", "#a67777", "#f5d902")) + 
-    theme(legend.position = "bottom") + 
+    scale_color_manual(values = c("black", "red", "orange", "#ff6f00", "grey", "#248f25", "#728772", "#a67777", "#f5d902")) +
+    theme(legend.position = "bottom") +
     stat_ellipse()
 disp
 
 inter <- 0.285*7
 
 png(filename = "~/disp_fin.png", width = 1036, height = 808)
-disp <- ggplot(data = fin_fin, aes(x=ors_lfc, y=usda_lfc)) + 
+disp <- ggplot(data = fin_fin, aes(x=ors_lfc, y=usda_lfc)) +
     geom_point(size = 2) +
-    labs(x = "ORS285 LFC - AA vs YM", y = "USDA110 LFC - AA vs YM") + 
-    theme(legend.position = "bottom", 
+    labs(x = "ORS285 LFC - AA vs YM", y = "USDA110 LFC - AA vs YM") +
+    theme(legend.position = "bottom",
           axis.title.x = element_text(size = 30), axis.title.y = element_text(size = 30),
           axis.text.x = element_text(size = 25), axis.text.y = element_text(size = 25)) +
-    geom_smooth(data = fin_fin[which(fin_fin$ors_lfc > 2 | fin_fin$usda_lfc > 2 | fin_fin$ors_lfc < -2 | fin_fin$usda_lfc < -2),], 
+    geom_smooth(data = fin_fin[which(fin_fin$ors_lfc > 2 | fin_fin$usda_lfc > 2 | fin_fin$ors_lfc < -2 | fin_fin$usda_lfc < -2),],
                 method = "lm", formula = y ~ x, linetype="dashed",
                 color="darkred", fill="blue") +
     # stat_poly_eq(data = fin_fin[which(fin_fin$ors_lfc > 2 | fin_fin$usda_lfc > 2 | fin_fin$ors_lfc < -2 | fin_fin$usda_lfc < -2),],
@@ -267,10 +270,10 @@ dev.off()
 
 ### WARNNG: this uses the table generated at the very end of this script !
 table <- cbind(table, a)
-disp <- ggplot(data = table, aes(x=ors_lfc_QN, y=usda_lfc_QN, color=a)) + 
+disp <- ggplot(data = table, aes(x=ors_lfc_QN, y=usda_lfc_QN, color=a)) +
     geom_point(size = 1) +
-    scale_color_manual(values = c("black", "red", "orange", "#ff6f00", "grey", "#248f25", "#728772", "#a67777", "#f5d902")) + 
-    theme(legend.position = "None") + 
+    scale_color_manual(values = c("black", "red", "orange", "#ff6f00", "grey", "#248f25", "#728772", "#a67777", "#f5d902")) +
+    theme(legend.position = "None") +
     stat_ellipse()
 disp
 
@@ -283,7 +286,7 @@ disp
 
 
 ##===========================================##
-##   Quick ggplot2 heatmap #### USELESS !!!  ## 
+##   Quick ggplot2 heatmap #### USELESS !!!  ##
 ##===========================================##
 
 #Convert from short-table to long-table
@@ -298,8 +301,8 @@ fin_long2 <- gather(data = fin_fin2, key = org, value = lfc, -ors_id, -usda_id, 
 
 
 
-heat_map_orthologs <- ggplot(data = fin_long2, aes(x=org, y=usda_id, fill=lfc)) + 
-    geom_tile() + 
+heat_map_orthologs <- ggplot(data = fin_long2, aes(x=org, y=usda_id, fill=lfc)) +
+    geom_tile() +
     scale_fill_gradientn(colours = c("blue", "black", "yellow"), limits = c(-5, 5))
 heat_map_orthologs
 
@@ -388,7 +391,7 @@ split_cluster_table = function(nb_cluster, som_data, count_data){
         table = data.frame(ors = numeric(), usda = numeric())
         for (i in 1:length(index_cluster)){
             index = index_cluster[i]
-            table[i,] <- count_data[index,] 
+            table[i,] <- count_data[index,]
         }
         one_cluster = assign(paste("cluster", cluster , sep = "."), table, envir=parent.frame())
     }
@@ -402,9 +405,9 @@ plot_cluster = function(nb_cluster, som_data, count_data){
         table = data.frame(ors = numeric(), usda = numeric())
         for (i in 1:length(index_cluster)){
             index = index_cluster[i]
-            table[i,] <- count_data[index,] 
+            table[i,] <- count_data[index,]
         }
-        
+
         table_cluster = as.data.frame(table)
         dlong = melt(data.frame(gene=row.names(table_cluster), table_cluster))
         plot_cls = plot_cls = ggplot(dlong, aes(x=variable , y=value, color=gene, group=gene)) +
@@ -423,18 +426,18 @@ plot_cluster = function(nb_cluster, som_data, count_data){
 # library(mclust)
 # BIC = mclustBIC(mean_DE_cpm_log2_CR, G=c(1:50))
 # plot(BIC)
-# 
+#
 # #summary(BIC)
 # #mod1 = Mclust(relative_DE_cpm, x = BIC)
 # #summary(mod1, parameters = TRUE)
 # #plot(mod1, what = "classification")
 # #table(class, mod1$classification)
-# 
-# 
+#
+#
 # ## nbClust several indexes
 # #cindex ou dindex
-# nb_cpm = NbClust(mean_DE_cpm_log2_CR, diss=NULL, distance = "euclidean", 
-#                  min.nc=2, max.nc=50, method = "kmeans", 
+# nb_cpm = NbClust(mean_DE_cpm_log2_CR, diss=NULL, distance = "euclidean",
+#                  min.nc=2, max.nc=50, method = "kmeans",
 #                  index = "dindex", alphaBeale = 0.1)
 # hist(nb_cpm$Best.nc, breaks = max(na.omit(nb_cpm$Best.nc)))
 
@@ -467,7 +470,7 @@ plot(som_CR, type = "dist.neighbours")
 # rm(som_CR)
 
 #===========================================================#
-# creation of cluster file (all and splited) 
+# creation of cluster file (all and splited)
 #===========================================================#
 # split cluster
 split_cluster_table(nb_cluster = nb_clust, som_data = som_CR, count_data = fin_clust)
@@ -502,11 +505,11 @@ colors = c(seq(-5,-3.501,length=100),seq(-3.5,0.5,length=100),seq(0.501,5,length
 cluster_label = as.data.frame(total_cluster_id[,3])
 row.names(cluster_label) = row.names(total_cluster_id)
 
-pheatmap(total_cluster_id[,1:2], annotation_row = cluster_label, cluster_rows = TRUE, cluster_cols = FALSE, breaks = colors, 
+pheatmap(total_cluster_id[,1:2], annotation_row = cluster_label, cluster_rows = TRUE, cluster_cols = FALSE, breaks = colors,
          color = my_palette, show_rownames = FALSE, border_color = NA)
 
 ## heatmap without cluster details
-pheatmap(total_cluster_id[,1:2], cluster_rows = TRUE, cluster_cols = FALSE, breaks = colors, 
+pheatmap(total_cluster_id[,1:2], cluster_rows = TRUE, cluster_cols = FALSE, breaks = colors,
          color = my_palette, show_rownames = TRUE, fontsize_row = 1, border_color = NA)
 
 
@@ -522,7 +525,7 @@ my_palette <- colorRampPalette(c("blue", "black", "yellow"))(n = 399)
 colors = c(seq(-10,-2.501,length=100),seq(-2.5,0.5,length=100),seq(0.501,2.5,length=100),seq(2.501,10,length=100))
 
 bmp(file = "C:/Users/quent/Desktop/ortholog_heatmap_all.bmp", width = 400, height = 1200, units = "px")
-pheatmap(total_cluster_id[,1:2], cluster_rows = TRUE, cluster_cols = FALSE, breaks = colors, 
+pheatmap(total_cluster_id[,1:2], cluster_rows = TRUE, cluster_cols = FALSE, breaks = colors,
          color = my_palette, show_rownames = FALSE, border_color = NA)
 dev.off()
 
@@ -542,7 +545,7 @@ colors = c(seq(-15,-7.501,length=100),seq(-7.5,0.5,length=100),seq(0.501,7,lengt
 for (test in levels(a)) {
     nb <- dim(total_cluster_id[which(fin_fin3$a == test),1:2])[1]
     pdf(file = paste("C:/Users/quent/Desktop/ortholog_heatmap_subset_", test, ".pdf", sep = ""), width = 7, height = 1+0.14*nb)
-    pheatmap(total_cluster_id[which(fin_fin3$a == test),1:2], cluster_rows = TRUE, cluster_cols = FALSE, breaks = colors, 
+    pheatmap(total_cluster_id[which(fin_fin3$a == test),1:2], cluster_rows = TRUE, cluster_cols = FALSE, breaks = colors,
              color = my_palette, show_rownames = TRUE, fontsize_row = 5, border_color = NA)
     dev.off()
 }
@@ -550,7 +553,7 @@ for (test in levels(a)) {
 
 
 
-#Pour refaire les heatmap et cluster à partir de cluster_CR_all
+#Pour refaire les heatmap et cluster ï¿½ partir de cluster_CR_all
 #===========================================================#
 # download cluster from file
 #===========================================================#
@@ -562,14 +565,14 @@ colors = c(seq(-2.5,-1,length=100),seq(-0.9999,0.5,length=100),seq(0.501,1.5,len
 #attention a la colonne cluster a preciser
 cluster_label = as.data.frame(cluster_table[,15])
 row.names(cluster_label) = row.names(cluster_table)
-pheatmap(cluster_table[,1:14], annotation_row = cluster_label, cluster_rows = FALSE, cluster_cols = FALSE, breaks = colors, 
+pheatmap(cluster_table[,1:14], annotation_row = cluster_label, cluster_rows = FALSE, cluster_cols = FALSE, breaks = colors,
          color = my_palette, show_rownames = FALSE, border_color = NA)
 
 # profil
 dlong = melt(data.frame(gene=row.names(`1_cluster_plot`), `1_cluster_plot`))
 plot  = ggplot(dlong, aes(x=variable , y=value, color="black", group=gene)) +
     geom_line(show.legend = FALSE, alpha=0.4)
-plot + stat_summary(aes(group = dlong$cluster), 
+plot + stat_summary(aes(group = dlong$cluster),
                     fun.y=mean, geom="line", colour="black")
 
 
@@ -632,15 +635,14 @@ openxlsx::write.xlsx(table, file= "C:/Users/quent/Desktop/flo_Orth_data_ortholog
 
 for (cond in levels(fin_fin$gene_type)) {
     curr <- fin_fin[which(fin_fin$gene_type == cond),]
-    
+
     ors_annot_s <- ors$Product[which(ors$Gene.accession %in% fin_fin$ors_id)][order(ors$Gene.accession[which(ors$Gene.accession %in% fin_fin$ors_id)])][rank(fin_fin$ors_id)]
     ors_annot_s <- ors_annot_s[which(fin_fin$gene_type == cond)]
-    
+
     usda_annot_s <- usda$EugenePP_annotation[which(usda$Label %in% fin_fin$usda_id)][order(usda$Label[which(usda$Label %in% fin_fin$usda_id)])][rank(fin_fin$usda_id)]
     usda_annot_s <- usda_annot_s[which(fin_fin$gene_type == cond)]
-    
+
     curr <- cbind(curr, ors_annot_s, usda_annot_s)
-    
+
     xlsx::write.xlsx(curr, file = "C:/Users/quent/Desktop/ortholog_genes_subsets.xlsx", sheetName = cond, append = TRUE)
 }
-
