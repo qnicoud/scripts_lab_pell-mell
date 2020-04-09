@@ -92,13 +92,14 @@ load("ortholog_objects")
 # At the end of the session
 save(list = ls(), file = "ortholog_objects")
 
-###############################################################################################################################################################
+#####
 #                                                         _______________________________________
 #                                               _________|                                      |_______
 #                                               \       |              Get data                |      /
 #                                               \      |                                      |     /
 #                                              /      |______________________________________|     \
 #                                            /__________)                                (_________\
+#####
 
 ## Gather transcriptomic data
 ors <- openxlsx::read.xlsx(xlsxFile = "C:/Users/quent/Desktop/summary_ORS_USDA_transcriptome.xlsx", sheet = 1)
@@ -121,13 +122,14 @@ for (i in 1:dim(orth)[1]) {
     }
 }
 
-###############################################################################################################################################################
+#####
 #                                                         _______________________________________
 #                                               _________|                                      |_______
 #                                               \       |             Format data              |      /
 #                                               \      |                                      |     /
 #                                              /      |______________________________________|     \
 #                                            /__________)                                (_________\
+#####
 
 
 # Clean the ortholog table by removing lines with "No Hit" or empty cells
@@ -203,9 +205,9 @@ dim(orth_spec)
 
 
 
-#=======================================
+#=======================================#
 #  Order the data
-#=======================================
+#=======================================#
 
 # Perepare data for the final table (need to get them in the right order)
 usda_id <- usda_fin$Label[order(usda_fin$Label)][rank(orth_spec$Bjap)]
@@ -222,9 +224,9 @@ fin_fin <- data.frame(ors_id = ors_id, usda_id = usda_id,
                       ors_lfc = ors_lfc, usda_lfc = usda_lfc)
 
 
-#=======================================
+#=======================================#
 #  Filtering on FDR
-#=======================================
+#=======================================#
 
 sub_fdr_ors <- ors$Gene.accession %in% fin_fin$ors_id
 sub_fdr_usda <- usda$Label %in% fin_fin$usda_id
@@ -242,13 +244,14 @@ fin_fdr_filt <- fin_fin[sub_ok,]
 
 
 
-###############################################################################################################################################################
+#####
 #                                                         _______________________________________
 #                                               _________|                                      |_______
 #                                               \       |            Visualize data            |      /
 #                                               \      |                                      |     /
 #                                              /      |______________________________________|     \
 #                                            /__________)                                (_________\
+#####
 
 disp <- ggplot(data = fin_fdr_filt, aes(x=ors_lfc, y=usda_lfc, color=a)) + 
     geom_point(size = 1) +
@@ -326,13 +329,14 @@ heat_map_orthologs <- ggplot(data = fin_long2, aes(x=org, y=usda_id, fill=lfc)) 
 heat_map_orthologs
 
 
-###############################################################################################################################################################
+#####
 #                                                         _______________________________________
 #                                               _________|                                      |_______
 #                                               \       |      Get subsets for hm w/clust      |      /
 #                                               \      |                                      |     /
 #                                              /      |______________________________________|     \
 #                                            /__________)                                (_________\
+#####
 
 
 #============================#
@@ -350,6 +354,7 @@ fin_hm_clust <- (fin_fdr_filt %>% distinct())
 #------------------------------------------DONE
 
 
+## Required for followings
 sub_fdr_ors <- ors$Gene.accession %in% fin_fin$ors_id
 sub_fdr_usda <- usda$Label %in% fin_fin$usda_id
 sub_fdr_ors_filtered <- ors$AA_vs_YM.FDR[which(sub_fdr_ors)]#[order(ors$Gene.accession[which(sub_fdr_ors)])][rank(fin_fin$ors_id)]
@@ -360,12 +365,12 @@ sub_fdr_usda_filtered <- usda$AA_vs_YM_FDR[which(sub_fdr_usda)]#[order(usda$Labe
 fdr_trim_ors <- ors$Gene.accession[which(sub_fdr_ors)][which(sub_fdr_ors_filtered > fdr_thresh)]
 fdr_trim_usda <- usda$Label[which(sub_fdr_usda)][which(sub_fdr_usda_filtered > fdr_thresh)]
 
-sub_ok <- as.logical(fin_fin$ors_id %in% fdr_trim_ors)
+sub_ok <- as.logical(fin_fin$ors_id %in% fdr_trim_ors * fin_fin$usda_id %in% fdr_trim_usda)
 
 fin_fdr_filt_not <- fin_fin[sub_ok,]
 
 hm_clust_name <- "fin_fdr_filt_not"
-fin_hm_clust <- (fin_fdr_filt_ors %>% distinct())
+fin_hm_clust <- (fin_fdr_filt_not %>% distinct())
 #------------------------------------------DONE
 
 #===================================#
@@ -374,7 +379,7 @@ fin_hm_clust <- (fin_fdr_filt_ors %>% distinct())
 fdr_trim_ors <- ors$Gene.accession[which(sub_fdr_ors)][which(sub_fdr_ors_filtered < fdr_thresh)]
 fdr_trim_usda <- usda$Label[which(sub_fdr_usda)][which(sub_fdr_usda_filtered > fdr_thresh)]
 
-sub_ok <- as.logical(fin_fin$ors_id %in% fdr_trim_ors)
+sub_ok <- as.logical(fin_fin$ors_id %in% fdr_trim_ors * fin_fin$usda_id %in% fdr_trim_usda)
 
 fin_fdr_filt_ors <- fin_fin[sub_ok,]
 
@@ -382,14 +387,13 @@ hm_clust_name <- "fin_fdr_filt_ors"
 fin_hm_clust <- (fin_fdr_filt_ors %>% distinct())
 #------------------------------------------DONE
 
-
 #===================================#
 #FDR filtering ors not-DEG usda DEG 
 #===================================#
 fdr_trim_ors <- ors$Gene.accession[which(sub_fdr_ors)][which(sub_fdr_ors_filtered > fdr_thresh)]
 fdr_trim_usda <- usda$Label[which(sub_fdr_usda)][which(sub_fdr_usda_filtered < fdr_thresh)]
 
-sub_ok <- as.logical(fin_fin$usda_id %in% fdr_trim_usda)
+sub_ok <- as.logical(fin_fin$ors_id %in% fdr_trim_ors * fin_fin$usda_id %in% fdr_trim_usda)
 
 fin_fdr_filt_usda <- fin_fin[sub_ok,]
 hm_clust_name <- "fin_fdr_filt_usda"
@@ -449,13 +453,14 @@ fin_hm_clust <- (fin_fdr_lfc_filt %>% distinct())
 }
 
 
-###############################################################################################################################################################
+#####
 #                                                         _______________________________________
 #                                               _________|                                      |_______
 #                                               \       |              Heat map                |      /
 #                                               \      |            w/ clustering             |     /
 #                                              /      |______________________________________|     \
 #                                            /__________)                                (_________\
+#####
 
 
 fin_clust <- fin_hm_clust[,3:4]
@@ -508,9 +513,9 @@ plot_cluster = function(nb_cluster, som_data, count_data){
     }
 }
 
-#############################################################################
+#===================================#
 # estimation nombre de cluster
-#############################################################################
+#===================================#
 
 #Now useless
 {
@@ -679,13 +684,14 @@ dev.off()
     #                     fun.y=mean, geom="line", colour="black")
 }
 
-###############################################################################################################################################################
+#####
 #                                                         _______________________________________
 #                                               _________|                                      |_______
 #                                               \       |             Export data              |      /
 #                                               \      |                                      |     /
 #                                              /      |______________________________________|     \
 #                                            /__________)                                (_________\
+#####
 
 
 
