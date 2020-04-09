@@ -1,0 +1,15 @@
+#+TITLE: Analyse de l'incidence du syndrôme grippal
+
+#+PROPERTY: header-args :session :export both
+
+#+NAME: data-url
+https://www.sentiweb.fr/datasets/incidence-PAY-3.csv
+
+#+begin_src python :results silent :var data_url=data-url
+from urllib.request import urlopen
+
+data = urlopen(data_url).read()
+lines = data.decode('ascii').strip().split('\n')
+data_lines = lines[1:]
+table= [line.split(',')for line in data_lines]
+#+end_src
