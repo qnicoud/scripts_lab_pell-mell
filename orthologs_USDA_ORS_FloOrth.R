@@ -266,13 +266,22 @@ inter <- 0.285*7
 lfc_thresh <- 1.58
 
 fin_fdr_lfc_filt <- fin_fdr_filt[which((fin_fdr_filt$ors_lfc > lfc_thresh | fin_fdr_filt$ors_lfc < -lfc_thresh) & (fin_fdr_filt$usda_lfc > lfc_thresh | fin_fdr_filt$usda_lfc < -lfc_thresh)),]
-png(filename = "~/disp_fin.png", width = 1036, height = 808)
+png(filename = "~/disp_fin2.png", width = 1036, height = 808)
 disp <- ggplot(data = fin_fdr_lfc_filt, aes(x=ors_lfc, y=usda_lfc)) + 
+    geom_smooth(data = fin_fdr_lfc_filt,
+                method = "lm", formula = y ~ x, linetype="dashed",
+                color="darkred", fill="blue") +
     geom_point(size = 2) +
     labs(x = "ORS285 LFC - AA vs YM", y = "USDA110 LFC - AA vs YM") + 
+    stat_ellipse(data = fin_fdr_lfc_filt[intersect(which(fin_fdr_lfc_filt$ors_lfc > 7), which(fin_fdr_lfc_filt$usda_lfc > 7)),], type = "t", colour = "red") +
     theme(legend.position = "bottom", 
           axis.title.x = element_text(size = 30), axis.title.y = element_text(size = 30),
-          axis.text.x = element_text(size = 25), axis.text.y = element_text(size = 25)) +
+          axis.text.x = element_text(size = 25), axis.text.y = element_text(size = 25),
+          plot.background = element_rect(fill = "#f5f5f5")) #+ 
+    geom_label_repel(data = fin_fdr_lfc_filt[intersect(which(fin_fdr_lfc_filt$ors_lfc > 7), which(fin_fdr_lfc_filt$usda_lfc > 7)),],
+                     aes(label = ors_id, size = 0.5),
+                     box.padding = unit(0.35, "lines"),
+                     point.padding = unit(0.3, "lines"))
     # stat_poly_eq(data = fin_fdr_lfc_filt,
     #              formula = y ~ x,
     #              eq.with.lhs = "italic(hat(y))~`=`~",
@@ -282,9 +291,7 @@ disp <- ggplot(data = fin_fdr_lfc_filt, aes(x=ors_lfc, y=usda_lfc)) +
     #              label.y = 0.995) +
     # geom_abline(slope = 0.6, intercept = inter, color = "darkred", size = 1) +
     # geom_abline(slope = 0.6, intercept = -inter, color = "darkred", size = 1) +
-    geom_smooth(data = fin_fdr_lfc_filt,
-                method = "lm", formula = y ~ x, linetype="dashed",
-                color="darkred", fill="blue")
+
     
 disp
 dev.off()
@@ -762,3 +769,29 @@ openxlsx::write.xlsx(table, file= "C:/Users/quent/Desktop/flo_Orth_data_ortholog
     #     xlsx::write.xlsx(curr, file = "C:/Users/quent/Desktop/ortholog_genes_subsets.xlsx", sheetName = cond, append = TRUE)
     # }
 }
+
+if(!require(xlsx)) {
+    instal.packages("xlsx")
+    library(xlsx)
+}
+
+
+ors_mean_YM <- ors$YM.mean.reads[which(ors$Gene.accession %in% fin_fdr_filt$ors_id)][order(ors$Gene.accession[which(ors$Gene.accession %in% fin_fdr_filt$ors_id)])][rank(fin_fdr_filt$ors_id)]
+ors_mean_AA <- ors$AA.mean.reads[which(ors$Gene.accession %in% fin_fdr_filt$ors_id)][order(ors$Gene.accession[which(ors$Gene.accession %in% fin_fdr_filt$ors_id)])][rank(fin_fdr_filt$ors_id)]
+ors_annot <- ors$Product[which(ors$Gene.accession %in% fin_fdr_filt$ors_id)][order(ors$Gene.accession[which(ors$Gene.accession %in% fin_fdr_filt$ors_id)])][rank(fin_fdr_filt$ors_id)]
+ors_gene_name <- ors$Gene.name[which(ors$Gene.accession %in% fin_fdr_filt$ors_id)][order(ors$Gene.accession[which(ors$Gene.accession %in% fin_fdr_filt$ors_id)])][rank(fin_fdr_filt$ors_id)]
+
+ors_fdr <- ors$AA_vs_YM.FDR[which(ors$Gene.accession %in% fin_fdr_filt$ors_id)][order(ors$Gene.accession[which(ors$Gene.accession %in% fin_fdr_filt$ors_id)])][rank(fin_fdr_filt$ors_id)]
+
+usda_mean_YM <- usda$YM.reads[which(usda$Label %in% fin_fdr_filt$usda_id)][order(usda$Label[which(usda$Label %in% fin_fdr_filt$usda_id)])][rank(fin_fdr_filt$usda_id)]
+usda_mean_AA <- usda$AA.reads[which(usda$Label %in% fin_fdr_filt$usda_id)][order(usda$Label[which(usda$Label %in% fin_fdr_filt$usda_id)])][rank(fin_fdr_filt$usda_id)]
+usda_annot <- usda$EugenePP_annotation[which(usda$Label %in% fin_fdr_filt$usda_id)][order(usda$Label[which(usda$Label %in% fin_fdr_filt$usda_id)])][rank(fin_fdr_filt$usda_id)]
+usda_gene_name <- usda$gene_name[which(usda$Label %in% fin_fdr_filt$usda_id)][order(usda$Label[which(usda$Label %in% fin_fdr_filt$usda_id)])][rank(fin_fdr_filt$usda_id)]
+
+usda_fdr <- usda$AA_vs_YM_FDR[which(usda$Label %in% fin_fdr_filt$usda_id)][order(usda$Label[which(usda$Label %in% fin_fdr_filt$usda_id)])][rank(fin_fdr_filt$usda_id)]
+
+
+xlsx::write.xlsx(fin_fdr_filt, file = "C:/Users/quent/Desktop/DEG-notDEG_subsets.xlsx", sheetName = "all_DEG")
+xlsx::write.xlsx(fin_fdr_filt_not, file = "C:/Users/quent/Desktop/DEG-notDEG_subsets.xlsx", sheetName = "no_DEG", append = TRUE)
+xlsx::write.xlsx(fin_fdr_filt_ors, file = "C:/Users/quent/Desktop/DEG-notDEG_subsets.xlsx", sheetName = "ors_DEG", append = TRUE)
+xlsx::write.xlsx(fin_fdr_filt_usda, file = "C:/Users/quent/Desktop/DEG-notDEG_subsets.xlsx", sheetName = "usda_DEG", append = TRUE)
