@@ -1,0 +1,146 @@
+---
+title: "USDA paper - Generation of figure 3"
+author: "Quentin Nicoud"
+date: "26/06/2020"
+output: html_notebook
+---
+
+
+## Objectives
+
+### Scope
+
+### Data used
+
+### Script goal
+
+### Method used
+
+## Analysis
+
+### Initialisaton of the environment
+
+The purpose here is just to clear the previous environment and load all required packages.
+
+```{r init}
+rm(list = ls())
+
+#Load Packages
+{
+    if (! require(openxlsx)) {
+        install.packages("openxlsx")
+        library(openxlsx)
+    }
+    
+    # if (! require(xlsx)) {
+    #     install.packages("xlsx")
+    #     library(xlsx)
+    # }
+    # 
+    #Package required for removing duplicates in tables.
+    if( ! require(dplyr)) {
+        install.packages("dplyr")
+        library(dplyr)
+    }
+    
+    if( ! require(ggplot2)) {
+        install.packages("ggplot2")
+        library(ggplot2)
+    }
+    
+    if( ! require(ggpmisc)) {
+        install.packages("ggpmisc")
+        library(ggpmisc)
+    }
+    
+    if( ! require(ggrepel)) {
+        install.packages("ggrepel")
+        library(ggrepel)
+    }
+    
+    # Package required to format tables in the long-table format
+    if( ! require(tidyr)) {
+        install.packages("tidyr")
+        library(tidyr)
+    }
+    
+    # #Packages required to make multipannel figures but cowplot won't be installed...
+    # if( ! require(gridExtra)) {
+    #     install.packages("gridExtra")
+    #     library(gridExtra)
+    # }
+    
+    # if( ! require(cowplot)) {
+    #     devtools::install_github("wilkelab/cowplot")
+    #     library(cowplot)
+    # }
+    
+    # library
+    if( ! require(pheatmap)) {
+        install.packages("pheatmap")
+        library(pheatmap)
+    }
+    
+    if( ! require(corrplot)) {
+        install.packages("corrplot")
+        library(corrplot)
+    }
+    
+    
+    if( ! require(kohonen)) {
+        install.packages("kohonen")
+        library(kohonen)
+    }
+    
+    if( ! require(reshape2)) {
+        install.packages("reshape2")
+        library(reshape2)
+    }
+    
+    if( ! require(NbClust)) {
+        install.packages("NbClust")
+        library(NbClust)
+    }
+    
+    if( ! require(edgeR)) {
+        if (!requireNamespace("BiocManager", quietly = TRUE))
+           install.packages("BiocManager")
+      
+        BiocManager::install("edgeR")
+        library(edgeR)
+    }
+}
+
+```
+
+### Get and Format data
+
+```{r data_format}
+sheets <- c("DAP_DEG_nod", "AA>GM", "GM>AA")
+
+
+dap_deg_nod_raw <- openxlsx::read.xlsx(xlsxFile = "C:/Users/quent/Desktop/USDA_mSystems_SuppTables_1704_ qn.xlsx", sheet = "DEG_DAP_nod")
+colnames(dap_deg_nod_raw) <- make.names(dap_deg_nod_raw[1,])
+dap_deg_nod_raw <- dap_deg_nod_raw[2:dim(dap_deg_nod_raw)[1],]
+dap_deg_nod <- cbind(dap_deg_nod_raw[,c(3,4)], as.data.frame(lapply(dap_deg_nod_raw[,c(12,13,14,23,24,25)], as.numeric), stringsAsFactors = FALSE))
+
+
+aa_gm_raw <- openxlsx::read.xlsx(xlsxFile = "C:/Users/quent/Desktop/USDA_mSystems_SuppTables_1704_ qn.xlsx", sheet = "AA>GM")
+colnames(aa_gm_raw) <- make.names(aa_gm_raw[1,])
+aa_gm_raw <- aa_gm_raw[2:dim(aa_gm_raw)[1],]
+aa_gm <- cbind(aa_gm_raw[,c(2,3)], as.data.frame(lapply(aa_gm_raw[,c(5,6,7,14,15,16)], as.numeric), stringsAsFactors = FALSE))
+
+gm_aa_raw <- openxlsx::read.xlsx(xlsxFile = "C:/Users/quent/Desktop/USDA_mSystems_SuppTables_1704_ qn.xlsx", sheet = "GM>AA")
+colnames(gm_aa_raw) <- make.names(gm_aa_raw[1,])
+gm_aa_raw <- gm_aa_raw[2:dim(gm_aa_raw)[1],]
+gm_aa <- cbind(gm_aa_raw[,c(3,4)], as.data.frame(lapply(gm_aa_raw[,c(12,13,14,21,22,23)], as.numeric), stringsAsFactors = FALSE))
+
+zarbi_raw <- openxlsx::read.xlsx(xlsxFile = "C:/Users/quent/Desktop/USDA_mSystems_SuppTables_1704_ qn.xlsx", sheet = "Zarbi")
+colnames(zarbi_raw) <- make.names(zarbi_raw[1,])
+zarbi_raw <- zarbi_raw[2:dim(zarbi_raw)[1],]
+zarbi <- cbind(zarbi_raw[,c(3,4)], as.data.frame(lapply(zarbi_raw[,c(12,13,14,21,22,23)], as.numeric), stringsAsFactors = FALSE))
+
+all_res <- list(dap_deg_nod = dap_deg_nod, aa_gm = aa_gm, gm_aa = gm_aa)
+wf <- lapply(all_res, format_USDA_datasets)
+```
+

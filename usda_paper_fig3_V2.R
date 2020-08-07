@@ -150,30 +150,24 @@ rm(list = ls())
 # 
 # wf <- list(dap_deg_nod = dap_deg_nod, aa_gm = aa_gm, gm_aa = gm_aa)
 
-dap_deg_nod_raw <- openxlsx::read.xlsx(xlsxFile = "C:/Users/quent/Desktop/USDA_mSystems_SuppTables_1704_ qn.xlsx", sheet = "DEG_DAP_nod")
-colnames(dap_deg_nod_raw) <- make.names(dap_deg_nod_raw[1,])
-dap_deg_nod_raw <- dap_deg_nod_raw[2:dim(dap_deg_nod_raw)[1],]
-dap_deg_nod <- cbind(dap_deg_nod_raw[,c(3,4)], as.data.frame(lapply(dap_deg_nod_raw[,c(12,13,14,23,24,25)], as.numeric), stringsAsFactors = FALSE))
+dap_deg_nod_raw <- openxlsx::read.xlsx(xlsxFile = "C:/Users/quent/Desktop/Global_t+p_table_with_all_genes_2020.xlsx", sheet = "DAP DEG Bacteroids vs YM")
+dap_deg_nod <- cbind(dap_deg_nod_raw[,c(3,4)], as.data.frame(lapply(dap_deg_nod_raw[,c(15,16,17,42,43,44)], as.numeric), stringsAsFactors = FALSE))
 
 
-aa_gm_raw <- openxlsx::read.xlsx(xlsxFile = "C:/Users/quent/Desktop/USDA_mSystems_SuppTables_1704_ qn.xlsx", sheet = "AA>GM")
-colnames(aa_gm_raw) <- make.names(aa_gm_raw[1,])
-aa_gm_raw <- aa_gm_raw[2:dim(aa_gm_raw)[1],]
-aa_gm <- cbind(aa_gm_raw[,c(2,3)], as.data.frame(lapply(aa_gm_raw[,c(5,6,7,14,15,16)], as.numeric), stringsAsFactors = FALSE))
+aa_gm_raw <- openxlsx::read.xlsx(xlsxFile = "C:/Users/quent/Desktop/Global_t+p_table_with_all_genes_2020.xlsx", sheet = "DAP DEG AA VS GM")
+aa_gm <- cbind(aa_gm_raw[,c(3,4)], as.data.frame(lapply(aa_gm_raw[,c(15,16,17,42,43,44)], as.numeric), stringsAsFactors = FALSE))
 
-gm_aa_raw <- openxlsx::read.xlsx(xlsxFile = "C:/Users/quent/Desktop/USDA_mSystems_SuppTables_1704_ qn.xlsx", sheet = "GM>AA")
-colnames(gm_aa_raw) <- make.names(gm_aa_raw[1,])
-gm_aa_raw <- gm_aa_raw[2:dim(gm_aa_raw)[1],]
-gm_aa <- cbind(gm_aa_raw[,c(3,4)], as.data.frame(lapply(gm_aa_raw[,c(12,13,14,21,22,23)], as.numeric), stringsAsFactors = FALSE))
+aa_gm_sup <- aa_gm[which(aa_gm_raw$AA_vs_GM_LFC > 0),]
+prot_sup <- (aa_gm_sup$AA_SC+1) / (aa_gm_sup$GM_SC+1)
+aa_gm_sup_trim <- aa_gm_sup[which(prot_sup >1),]
 
-zarbi_raw <- openxlsx::read.xlsx(xlsxFile = "C:/Users/quent/Desktop/USDA_mSystems_SuppTables_1704_ qn.xlsx", sheet = "Zarbi")
-colnames(zarbi_raw) <- make.names(zarbi_raw[1,])
-zarbi_raw <- zarbi_raw[2:dim(zarbi_raw)[1],]
-zarbi <- cbind(zarbi_raw[,c(3,4)], as.data.frame(lapply(zarbi_raw[,c(12,13,14,21,22,23)], as.numeric), stringsAsFactors = FALSE))
+aa_gm_inf <- aa_gm[which(aa_gm_raw$AA_vs_GM_LFC < 0),]
+prot_inf <- (aa_gm_inf$GM_SC+1) / (aa_gm_inf$AA_SC+1)
+aa_gm_inf_trim <- aa_gm_inf[which(prot_inf >1),]
 
-all_res <- list(dap_deg_nod = dap_deg_nod, aa_gm = aa_gm, gm_aa = gm_aa)
+all_res <- list(dap_deg_nod = dap_deg_nod, aa_gm = aa_gm_sup_trim, gm_aa = aa_gm_inf_trim)
 wf <- lapply(all_res, format_USDA_datasets)
-
+  
 
 # Heat map w/ clustering =============================================================================================================================
 #                                                         _______________________________________
@@ -352,11 +346,11 @@ creation_cluster <- function(som_CR, data, nb_clust) {
 
 # heatmap without cluster details and gene names 
 draw_hm_clust <- function(total_cluster_id, name) {
-    my_palette_prot <- colorRampPalette(c("black", "orange"))(n = 399)
+    my_palette_prot <- colorRampPalette(c("black", "yellow"))(n = 399)
     colors_prot = c(seq(0,1.66,length=100),seq(1.6601,3.33,length=100), seq(3.330001,5,length=100))
     
     my_palette_rna <- colorRampPalette(c("black", "yellow"))(n = 399)
-    colors_rna = c(seq(0,4,length=100),seq(4.0001,6,length=100), seq(6.0001,7.5,length=100))
+    colors_rna = c(seq(0,7.5,length=100),seq(7.50001,10,length=100), seq(10.0001,15,length=100))
     
     cluster_label = as.data.frame(total_cluster_id[,7])
     row.names(cluster_label) = row.names(total_cluster_id)

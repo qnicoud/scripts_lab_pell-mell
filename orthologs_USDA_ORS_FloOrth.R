@@ -278,10 +278,10 @@ disp <- ggplot(data = fin_fdr_lfc_filt, aes(x=ors_lfc, y=usda_lfc)) +
           axis.title.x = element_text(size = 30), axis.title.y = element_text(size = 30),
           axis.text.x = element_text(size = 25), axis.text.y = element_text(size = 25),
           plot.background = element_rect(fill = "#f5f5f5")) #+ 
-    geom_label_repel(data = fin_fdr_lfc_filt[intersect(which(fin_fdr_lfc_filt$ors_lfc > 7), which(fin_fdr_lfc_filt$usda_lfc > 7)),],
-                     aes(label = ors_id, size = 0.5),
-                     box.padding = unit(0.35, "lines"),
-                     point.padding = unit(0.3, "lines"))
+    # geom_label_repel(data = fin_fdr_lfc_filt[intersect(which(fin_fdr_lfc_filt$ors_lfc > 7), which(fin_fdr_lfc_filt$usda_lfc > 7)),],
+    #                  aes(label = ors_id, size = 0.5),
+    #                  box.padding = unit(0.35, "lines"),
+    #                  point.padding = unit(0.3, "lines"))
     # stat_poly_eq(data = fin_fdr_lfc_filt,
     #              formula = y ~ x,
     #              eq.with.lhs = "italic(hat(y))~`=`~",
@@ -551,7 +551,8 @@ plot_cluster = function(nb_cluster, som_data, count_data){
 
 wss <- (nrow(fin_clust)-1)*sum(apply(fin_clust,2,var))
 for (i in 2:50) wss[i] <- sum(kmeans(fin_clust,
-                                     iter.max = 100, centers=i)$withinss)
+                                     iter.max = 100, 
+                                     centers=i)$withinss)
 
 par(mfrow=c(2,2))
 plot(1:50, wss, type="b", xlab="Number of Clusters",
@@ -706,44 +707,44 @@ dev.off()
 ##             Whole Table             ##
 ##=====================================##
 
-ors_mean_YM <- ors$YM.mean.reads[which(ors$Gene.accession %in% fin_fdr_filt$ors_id)][order(ors$Gene.accession[which(ors$Gene.accession %in% fin_fdr_filt$ors_id)])][rank(fin_fdr_filt$ors_id)]
-ors_mean_AA <- ors$AA.mean.reads[which(ors$Gene.accession %in% fin_fdr_filt$ors_id)][order(ors$Gene.accession[which(ors$Gene.accession %in% fin_fdr_filt$ors_id)])][rank(fin_fdr_filt$ors_id)]
-ors_annot <- ors$Product[which(ors$Gene.accession %in% fin_fdr_filt$ors_id)][order(ors$Gene.accession[which(ors$Gene.accession %in% fin_fdr_filt$ors_id)])][rank(fin_fdr_filt$ors_id)]
-ors_gene_name <- ors$Gene.name[which(ors$Gene.accession %in% fin_fdr_filt$ors_id)][order(ors$Gene.accession[which(ors$Gene.accession %in% fin_fdr_filt$ors_id)])][rank(fin_fdr_filt$ors_id)]
+ors_mean_YM <- ors$YM.mean.reads[which(ors$Gene.accession %in% fin_fin$ors_id)][order(ors$Gene.accession[which(ors$Gene.accession %in% fin_fin$ors_id)])][rank(fin_fin$ors_id)]
+ors_mean_AA <- ors$AA.mean.reads[which(ors$Gene.accession %in% fin_fin$ors_id)][order(ors$Gene.accession[which(ors$Gene.accession %in% fin_fin$ors_id)])][rank(fin_fin$ors_id)]
+ors_annot <- ors$Product[which(ors$Gene.accession %in% fin_fin$ors_id)][order(ors$Gene.accession[which(ors$Gene.accession %in% fin_fin$ors_id)])][rank(fin_fin$ors_id)]
+ors_gene_name <- ors$Gene.name[which(ors$Gene.accession %in% fin_fin$ors_id)][order(ors$Gene.accession[which(ors$Gene.accession %in% fin_fin$ors_id)])][rank(fin_fin$ors_id)]
 
-ors_fdr <- ors$AA_vs_YM.FDR[which(ors$Gene.accession %in% fin_fdr_filt$ors_id)][order(ors$Gene.accession[which(ors$Gene.accession %in% fin_fdr_filt$ors_id)])][rank(fin_fdr_filt$ors_id)]
+ors_fdr <- ors$AA_vs_YM.FDR[which(ors$Gene.accession %in% fin_fin$ors_id)][order(ors$Gene.accession[which(ors$Gene.accession %in% fin_fin$ors_id)])][rank(fin_fin$ors_id)]
 
 ors_lfc_calc <- log(x = ors_mean_AA / ors_mean_YM, base = 2)
 
 
-usda_mean_YM <- usda$YM.reads[which(usda$Label %in% fin_fdr_filt$usda_id)][order(usda$Label[which(usda$Label %in% fin_fdr_filt$usda_id)])][rank(fin_fdr_filt$usda_id)]
-usda_mean_AA <- usda$AA.reads[which(usda$Label %in% fin_fdr_filt$usda_id)][order(usda$Label[which(usda$Label %in% fin_fdr_filt$usda_id)])][rank(fin_fdr_filt$usda_id)]
-usda_annot <- usda$EugenePP_annotation[which(usda$Label %in% fin_fdr_filt$usda_id)][order(usda$Label[which(usda$Label %in% fin_fdr_filt$usda_id)])][rank(fin_fdr_filt$usda_id)]
-usda_gene_name <- usda$gene_name[which(usda$Label %in% fin_fdr_filt$usda_id)][order(usda$Label[which(usda$Label %in% fin_fdr_filt$usda_id)])][rank(fin_fdr_filt$usda_id)]
+usda_mean_YM <- usda$YM.reads[which(usda$Label %in% fin_fin$usda_id)][order(usda$Label[which(usda$Label %in% fin_fin$usda_id)])][rank(fin_fin$usda_id)]
+usda_mean_AA <- usda$AA.reads[which(usda$Label %in% fin_fin$usda_id)][order(usda$Label[which(usda$Label %in% fin_fin$usda_id)])][rank(fin_fin$usda_id)]
+usda_annot <- usda$EugenePP_annotation[which(usda$Label %in% fin_fin$usda_id)][order(usda$Label[which(usda$Label %in% fin_fin$usda_id)])][rank(fin_fin$usda_id)]
+usda_gene_name <- usda$gene_name[which(usda$Label %in% fin_fin$usda_id)][order(usda$Label[which(usda$Label %in% fin_fin$usda_id)])][rank(fin_fin$usda_id)]
 
-usda_fdr <- usda$AA_vs_YM_FDR[which(usda$Label %in% fin_fdr_filt$usda_id)][order(usda$Label[which(usda$Label %in% fin_fdr_filt$usda_id)])][rank(fin_fdr_filt$usda_id)]
+usda_fdr <- usda$AA_vs_YM_FDR[which(usda$Label %in% fin_fin$usda_id)][order(usda$Label[which(usda$Label %in% fin_fin$usda_id)])][rank(fin_fin$usda_id)]
 
 usda_lfc_calc <- log(x = usda_mean_AA / usda_mean_YM, base = 2)
 
 
-table <- data.frame(ors_id = fin_fdr_filt$ors_id,
+table <- data.frame(ors_id = fin_fin$ors_id,
                     ors_gene = ors_gene_name,
-                    usda_id = fin_fdr_filt$usda_id,
+                    usda_id = fin_fin$usda_id,
                     usda_gene = usda_gene_name,
                     ors_annot = ors_annot,
                     usda_annot = usda_annot,
                     ors_mean_YM = ors_mean_YM,
                     ors_mean_AA = ors_mean_AA,
                     #ors_lfc_QN = ors_lfc_calc,
-                    ors_lfc = fin_fdr_filt$ors_lfc,
+                    ors_lfc = fin_fin$ors_lfc,
                     ors_fdr = ors_fdr,
                     usda_mean_YM = usda_mean_YM,
                     usda_mean_AA = usda_mean_AA,
                     #usda_lfc_QN = usda_lfc_calc,
-                    usda_lfc = fin_fdr_filt$usda_lfc,
+                    usda_lfc = fin_fin$usda_lfc,
                     usda_fdr = usda_fdr)
 
-#[order(fin_fdr_filt$usda_lfc)][rank(fin_fdr_filt$usda_id)]
+#[order(fin_fin$usda_lfc)][rank(fin_fin$usda_id)]
 
 
 openxlsx::write.xlsx(table, file= "C:/Users/quent/Desktop/flo_Orth_data_orthologs_ORS_USDA_YM_vs_AA.xlsx")
