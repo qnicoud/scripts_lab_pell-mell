@@ -1,8 +1,9 @@
-### Test du package DADA2
-### Date de cr�ation : 30.01.2020
+### Applpication of DADA2 package to mutliple datasets
+### Created  09.12.2020
 ### 
-### Objectif : tester le package dada2 avec le jeu de donn�es fourni par les d�veloppeurs puis avec les jeux de donn�es de metabarcode
-### Packages requis : devtools, dada2
+### Objective: automatized samples analysis
+### Required packages: devtools, dada2, seqinr
+
 
 rm(list = ls())
 
@@ -12,7 +13,7 @@ if (!require(devtools))
   install.packages("devtools")
 }
 
-devtools::install_github("benjjneb/dada2", ref="v1.14") # change the ref argument to get other versions
+devtools::install_github("benjjneb/dada2", ref="v1.16") # change the ref argument to get other versions
 
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
