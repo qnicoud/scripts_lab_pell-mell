@@ -1,0 +1,151 @@
+---
+title: "bacteroid_length"
+author: "Quentin Nicoud"
+date: "01/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "C:/Users/quent/Desktop/morphometry")
+```
+
+## Bacteroid morphology analysis
+
+This R Markdown document describes the anlysis of bacteroid morphometric data generated thanks to the MicrobeJ imageJ plug-in.
+
+First he data are extracted from the excel file.
+
+```{r init_and_load_data, echo=FALSE}
+rm(list = ls())
+
+getwd()
+require(readxl)
+require(openxlsx)
+
+# Get neames of the excel sheets
+sheets_name <- readxl::excel_sheets("./20201130_Results_4Cultures_4Sativa.xlsx")
+
+#Remove the first sheet wich was only displaying graphics
+sheets_name <- sheets_name[2:length(sheets_name)]
+
+#Extract data
+bact_length <- lapply(sheets_name, openxlsx::read.xlsx, xlsxFile = "./20201130_Results_4Cultures_4Sativa.xlsx")
+
+#Name list items with the data sheets name
+names(bact_length) <- sheets_name
+```
+
+Then, tables are generated for each parameter to analyze.
+
+```{r extract_data, echo=FALSE}
+# Genrerate the list of parameters to analyze.
+list_param <- c("area", "length", "width.mean", "width.max", 
+                "width.stdev", "circularity", "perimeter", 
+                "solidity", "aspectRatio")
+
+# Where as the above names will be used for naming the tables, the vector below 
+# Will be used to extract data for one parameters
+parameters <- paste("SHAPE.", list_param, sep="")
+
+#This function extracts the parameters of interest in each sample in order to generate
+# a table per paramter instead of a table per condition.
+extract_variables <- function(data, param) {
+    output <- list()
+    for (i in names(data)) {
+        output[[i]] <- data[[i]][,param]
+    }
+    
+    return(output)
+}
+
+#Apply the function to the raw data tables
+tables <- lapply(parameters, extract_variables, data = bact_length)
+
+#Rename items of the newly generated list 
+names(tables) <- list_param
+
+#Stack the tables
+tables_stacked <- lapply(tables, stack)
+
+#One vector of value behaved strangely and yielded abnormal graphs so I forced the conversion into numeric
+tables_stacked$width.stdev$values <- as.numeric(tables_stacked$width.stdev$values)
+```
+
+Finally, classes are associated to each condition in order to facet the graph
+
+```{r assign_classes}
+
+#This matrix, associates the conditions names in the tables with a class and an order for the graphs
+ref <- matrix(c(levels(tables_stacked$area$ind), 
+                  c("Sm1021", "Sm1021", "bacA", "bacA", "yejE", "yejE", "yejF", "yejF"),
+                  c(1, 2, 1, 2, 1, 2, 1, 2)), 
+                ncol = 3)
+
+# This function associate a class with a condition and modifies the tables in consequence
+associate_class <- function(result, ref) {
+    x <- c()
+    y <- c()
+    
+    for (i in 1:dim(result)[1]) {
+        x[i] <- ref[which(ref[,1] == result$ind[i]),2]
+        y[i] <- ref[which(ref[,1] == result$ind[i]),3]
+        
+    }
+    result <- cbind(result, class = x)
+    result <- cbind(result, ord = as.numeric(y))
+
+    return(result)
+}
+
+resultTest <- lapply(tables_stacked, associate_class, ref)
+```
+
+
+## Anova & graphs
+
+```{r anova, echo=FALSE}
+require(ggplot2)
+require(tidytext)
+
+do_anova <- function(table, name) {
+    
+    tukey <- TukeyHSD(aov(as.numeric(table$values) ~ table$ind, data = table ), conf.level = 0.95)
+    write.csv(tukey$`table$ind`, file = "tukey_stats.csv")
+    
+    pdf(file = "tukey.pdf")
+    print(plot(tukey))
+    dev.off()
+    
+    table$class <- factor(table$class, levels=c("Sm1021", "bacA", "yejE", "yejF"))
+    
+    tiff(file = "boxplot.tiff", height = 240)
+    print(ggplot(as.data.frame(table), aes(x = reorder_within(ind, ord, class), y = values, fill = ind)) +
+                geom_boxplot(size = 1.1) +
+                facet_grid(~class, scales = "free") + 
+                scale_x_reordered() +
+                scale_fill_manual(values = c("white", "grey", "#605F58", "black", "#FFC58B",  "#FF9223", "#FF9C81", "#FF5123")) +
+                labs(x = "", y = name) +
+                theme(legend.position = "none",
+                    strip.text = element_text(size = 24, face="bold"),
+                    axis.title.y = element_text(size = 22),
+                    axis.text.y = element_text(size = 20),
+                    axis.text.x = element_blank())
+    )
+    dev.off()
+}
+
+tables_stats <- function(tables) {
+    for ( i in names(tables)) {
+        dir.create(i)
+        setwd(paste("./", i, sep=""))
+        temp <- as.data.frame(tables[[i]])
+        do_anova(temp, i)
+        setwd("..")
+    }
+}
+
+tables_stats(resultTest)
+
+
+```
