@@ -31,23 +31,26 @@ library(dada2)
 ##                                                          ##
 ##############################################################
 
-#cree une chaine de caractère, permet de fixer le dossier de travail, eviter les espaces dans le nom de chemin de fichier 
 path <- "C:/Users/jeremy.cigna/Desktop/metabarcod gapA/2020/metabarcod/19_67/seq_sept2020"
 
+setwd(path)
+
 # Forward and reverse fastq filenames have format: SAMPLENAME_trim_map_r1.fastq and SAMPLENAME_trim_map_r2.fastq
-file_names_Fwd_seq <- sort(list.files(path, pattern="_trim_map_r1.fastq", full.names = TRUE))
-file_names_Rev_seq <- sort(list.files(path, pattern="_trim_map_r2.fastq", full.names = TRUE))
+file_names <- sort(pattern=".fastq", full.names = TRUE)
+
 
 # Extract sample names, assuming filenames have format: SAMPLENAME_XXX.fastq simplifie 
-# la lecture en gardant juste le nom d'échantillon
 sample_names <- sapply(strsplit(basename(file_names_Fwd_seq), "_"), `[`, 1)
 
-# trimRs <- file.path(path, "trimmed", paste0(sample_names, "_R_trim.fastq.gz"))
-# 
-# file_to_trim <- removePrimers(fn = file_names_Rev_seq, fout = trimRs, primer.fwd = "TCRTACCARGAAACCAGTT", max.mismatch = 5)
+plotQuality <- function(path_to_file) {
+    dir.create("quality_check")
+    
+    pdf(file = path_to_file)
+}
 
-# Check read quality along the sequence
-x11() ; plotQualityProfile(file_names_Fwd_seq)
+# readline scan
+
+plotQualityProfile(file_names_Fwd_seq)
 
 x11() ; plotQualityProfile(file_names_Rev_seq)
 
