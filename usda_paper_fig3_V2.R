@@ -154,7 +154,7 @@ dap_deg_nod_raw <- openxlsx::read.xlsx(xlsxFile = "C:/Users/quent/Desktop/Global
 dap_deg_nod <- cbind(dap_deg_nod_raw[,c(3,4)], as.data.frame(lapply(dap_deg_nod_raw[,c(15,16,17,42,43,44)], as.numeric), stringsAsFactors = FALSE))
 
 
-aa_gm_raw <- openxlsx::read.xlsx(xlsxFile = "C:/Users/quent/Desktop/Global_t+p_table_with_all_genes_2020.xlsx", sheet = "DAP DEG AA VS GM")
+aa_gm_raw <- openxlsx::read.xlsx(xlsxFile = "D:/Work/temp_desktop/Global_t+p_table_with_all_genes_2020.xlsx", sheet = "DAP DEG AA VS GM")
 aa_gm <- cbind(aa_gm_raw[,c(3,4)], as.data.frame(lapply(aa_gm_raw[,c(15,16,17,42,43,44)], as.numeric), stringsAsFactors = FALSE))
 
 aa_gm_sup <- aa_gm[which(aa_gm_raw$AA_vs_GM_LFC > 0),]
